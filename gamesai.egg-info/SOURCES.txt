@@ -1,0 +1,5 @@
+setup.py
+gamesai.egg-info/PKG-INFO
+gamesai.egg-info/SOURCES.txt
+gamesai.egg-info/dependency_links.txt
+gamesai.egg-info/top_level.txt
