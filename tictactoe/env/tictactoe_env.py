@@ -1,72 +1,80 @@
-import numpy as np
-
 class TicTacToeEnv:
     def __init__(self):
-        """
-        Initialize the Tic Tac Toe environment.
-        """
-        self.state = np.zeros(9, dtype=int)  # 1D array representing the board
-        self.done = False  # Whether the game has ended
-        self.current_player = 1  # 1 for Player 1, -1 for Player 2
+        self.board = [' '] * 9
+        self.current_player = 'X'
+        self.done = False
+        self.winner = None
 
     def reset(self):
         """
-        Reset the environment to the initial state.
-        :return: The initial state of the board.
+        Reset the board to the initial state.
         """
-        self.state = np.zeros(9, dtype=int)
+        self.board = [' '] * 9
+        self.current_player = 'X'
         self.done = False
-        self.current_player = 1
-        return self.state
+        self.winner = None
+        return self.get_state()
+
+    def get_state(self):
+        """
+        Return the current board state as a string.
+        """
+        return ''.join(self.board)
+
+    def get_valid_actions(self):
+        """
+        Return a list of valid actions (empty cell indices).
+        """
+        return [i for i, cell in enumerate(self.board) if cell == ' ']
 
     def step(self, action):
         """
-        Take a step in the environment by making a move.
-        :param action: The index (0-8) of the cell to play.
-        :return: Tuple (state, reward, done)
+        Execute the action and update the board.
+        Args:
+            action (int): The cell index to place the current player's mark.
+        
+        Returns:
+            state (str): The new board state.
+            reward (float): The reward for the current move.
+            done (bool): Whether the game is over.
         """
         if self.done:
-            raise ValueError("Game has ended. Please reset the environment.")
-        if self.state[action] != 0:
-            return self.state, -1, True  # Invalid move: return penalty and end game
+            return self.get_state(), 0.0, True  # Game over, no changes
         
+        if self.board[action] != ' ':
+            return self.get_state(), -0.1, False  # Invalid move penalty
+
         # Make the move
-        self.state[action] = self.current_player
+        self.board[action] = self.current_player
 
         # Check for a winner or draw
-        reward, self.done = self.check_game_status()
-        
-        # Switch player if the game isn't done
-        if not self.done:
-            self.current_player *= -1
-        
-        return self.state, reward, self.done
+        if self.check_winner(self.current_player):
+            self.done = True
+            self.winner = self.current_player
+            return self.get_state(), 1.0, True  # Win reward
+        elif ' ' not in self.board:
+            self.done = True
+            return self.get_state(), 0.0, True  # Draw reward
 
-    def check_game_status(self):
+        # Switch player
+        self.current_player = 'O' if self.current_player == 'X' else 'X'
+        return self.get_state(), 0.0, False  # No reward yet
+
+    def check_winner(self, player):
         """
-        Check the game status to determine if someone has won or if there's a draw.
-        :return: Tuple (reward, done)
+        Check if the given player has won the game.
         """
-        # Winning combinations
-        win_states = [
+        winning_combinations = [
             [0, 1, 2], [3, 4, 5], [6, 7, 8],  # Rows
             [0, 3, 6], [1, 4, 7], [2, 5, 8],  # Columns
-            [0, 4, 8], [2, 4, 6]             # Diagonals
+            [0, 4, 8], [2, 4, 6]              # Diagonals
         ]
-        for line in win_states:
-            if abs(self.state[line].sum()) == 3:
-                return (1 if self.state[line[0]] == self.current_player else -1), True
-        
-        # Check for a draw
-        if 0 not in self.state:
-            return 0, True
-        
-        return 0, False  # Game continues
+        return any(all(self.board[i] == player for i in combo) for combo in winning_combinations)
 
     def render(self):
         """
-        Render the current state of the board.
+        Render the board for debugging or text-based interaction.
         """
-        symbols = {0: ".", 1: "X", -1: "O"}
-        board = [symbols[cell] for cell in self.state]
-        print("\n".join([" ".join(board[i:i+3]) for i in range(0, 9, 3)]))
+        for i in range(0, 9, 3):
+            print(self.board[i:i+3])
+        print()
