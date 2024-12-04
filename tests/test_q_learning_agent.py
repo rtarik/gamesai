@@ -15,7 +15,7 @@ class TestQLearningAgent(unittest.TestCase):
         state = 'test_state'
         state_key = self.agent.get_state_key(state)
         self.agent.q_table[state_key] = {a: 1.0 if a == 4 else 0.5 for a in self.actions}
-        self.agent.epsilon = 0  # Force exploitation
+        self.agent.exploration_rate = 0  # Force exploitation
         action = self.agent.choose_action(state)
         self.assertEqual(action, 4, "Agent should exploit and choose the action with the highest Q-value.")
 
@@ -60,9 +60,6 @@ class TestQLearningAgent(unittest.TestCase):
         # Check the updated Q-value
         updated_q = agent.q_table[state_key][action]
         self.assertAlmostEqual(updated_q, expected_q, places=5, msg="Q-value update is incorrect.")
-
-
-
 
 
 if __name__ == "__main__":

@@ -26,39 +26,46 @@ class TicTacToeEnv:
         Return a list of valid actions (empty cell indices).
         """
         return [i for i, cell in enumerate(self.board) if cell == ' ']
-
+    
     def step(self, action):
         """
         Execute the action and update the board.
         Args:
             action (int): The cell index to place the current player's mark.
-        
+            
         Returns:
             state (str): The new board state.
             reward (float): The reward for the current move.
             done (bool): Whether the game is over.
         """
         if self.done:
-            return self.get_state(), 0.0, True  # Game over, no changes
-        
-        if self.board[action] != ' ':
-            return self.get_state(), -0.1, False  # Invalid move penalty
+            return self.get_state(), 0.0, True  # Game already over, no changes.
 
-        # Make the move
+        # Check if the action is valid
+        if self.board[action] != ' ':
+            reward = 0.0
+            return self.get_state(), 0, False  # Invalid move penalty.
+
+        # Apply the action
         self.board[action] = self.current_player
 
         # Check for a winner or draw
         if self.check_winner(self.current_player):
             self.done = True
             self.winner = self.current_player
-            return self.get_state(), 1.0, True  # Win reward
+            reward = 100.0 if self.current_player == 'X' else -100.0  # Positive reward for win, negative for loss
         elif ' ' not in self.board:
             self.done = True
-            return self.get_state(), 0.0, True  # Draw reward
+            reward = 0.0
+        else:
+            reward = 0.0  # No result yet
 
-        # Switch player
+        # Switch to the other player
         self.current_player = 'O' if self.current_player == 'X' else 'X'
-        return self.get_state(), 0.0, False  # No reward yet
+
+        return self.get_state(), reward, self.done
+
+
 
     def check_winner(self, player):
         """

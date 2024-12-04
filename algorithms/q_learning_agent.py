@@ -1,4 +1,3 @@
-import numpy as np
 import random
 
 class QLearningAgent:
@@ -76,7 +75,8 @@ class QLearningAgent:
         
         # Q-learning update formula
         best_next_q = max(self.q_table[next_state_key].values())
-        td_target = reward + self.discount_factor * best_next_q * (1 - int(done))
+        td_target = reward + self.discount_factor * best_next_q
+        # * (1 - int(done))
         td_error = td_target - self.q_table[state_key][action]
         
         self.q_table[state_key][action] += self.learning_rate * td_error

@@ -1,13 +1,13 @@
 from tictactoe.env.tictactoe_env import TicTacToeEnv
 from algorithms.q_learning_agent import QLearningAgent
-import numpy as np
 import random
 
 def train_agent(episodes=1000):
     # Initialize environment and agent
     env = TicTacToeEnv()
     actions = list(range(9))  # Tic Tac Toe has 9 possible actions
-    agent = QLearningAgent(actions)
+    agent = QLearningAgent(actions, learning_rate=0.001, discount_factor=0.995, exploration_decay=0.999, min_exploration=0.01)
+    # lr=0.005, gamma=0.995, decay=0.999, min_eps=0.1
 
     # Training loop
     for episode in range(episodes):
@@ -75,7 +75,7 @@ def evaluate_agent(agent, games=100):
 
 if __name__ == "__main__":
     # Train the agent
-    trained_agent = train_agent(episodes=1000)
+    trained_agent = train_agent(episodes=20000)
     
     # Evaluate the trained agent
     evaluate_agent(trained_agent, games=100)
