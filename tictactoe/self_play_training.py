@@ -6,8 +6,8 @@ def self_play_train_agent(episodes=1000):
     # Initialize environment and agents
     env = TicTacToeEnv()
     actions = list(range(9))  # Tic Tac Toe has 9 possible actions
-    agent_X = QLearningAgent(actions, learning_rate=0.0001, exploration_decay=0.95, min_exploration=0.01)
-    agent_O = QLearningAgent(actions, learning_rate=0.005, exploration_decay=0.995, min_exploration=0.01)
+    agent_X = QLearningAgent(actions, learning_rate=0.02, discount_factor=0.995, exploration_decay=0.995, min_exploration=0.01)
+    agent_O = QLearningAgent(actions, learning_rate=0.1, discount_factor=0.995, exploration_decay=0.95, min_exploration=0.1)
 
     for episode in range(episodes):
         state = env.reset()
@@ -16,18 +16,24 @@ def self_play_train_agent(episodes=1000):
         while not done:
             if env.current_player == 'X':
                 # Player X chooses action
-                action = agent_X.choose_action(state)
+                action = -1
+                while action == -1 or env.board[action] != ' ':
+                    action = agent_X.choose_action(state)
+                next_state, reward, done = env.step(action)
+                agent_X.update(state, action, reward, next_state, done)
             else:
                 # Player O chooses action
-                action = agent_O.choose_action(state)
+                action = -1
+                while action == -1 or env.board[action] != ' ':
+                    action = agent_O.choose_action(state)
+                next_state, reward, done = env.step(action)
+                agent_O.update(state, action, -reward, next_state, done)
+
             
-            next_state, reward, done = env.step(action)
-            agent_X.update(state, action, reward, next_state, done)
-            agent_O.update(state, action, -reward, next_state, done)
             state = next_state
 
         # Print progress every 100 episodes
-        if (episode + 1) % 100 == 0:
+        if (episode + 1) % 1000 == 0:
             print(f"Episode {episode + 1}/{episodes} - Reward X: {reward}, Reward O: {-reward}")
 
     print("Self-play training completed!")
@@ -77,7 +83,7 @@ def evaluate_agent(agent, games=100, player='X'):
 
 if __name__ == "__main__":
     # Train the agents via self-play
-    agent_X, agent_O = self_play_train_agent(episodes=1000)
+    agent_X, agent_O = self_play_train_agent(episodes=10000)
 
     # Evaluate both agents
     print("\nEvaluating Agent X:")
